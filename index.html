@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星星云课堂 - 能力评估 Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      padding: 30px 20px;
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #fff;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+    .header h1 { font-size: 24px; margin-bottom: 8px; }
+    .emoji { font-size: 48px; display: block; margin-bottom: 10px; }
+    
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+    }
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #666;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    
+    .page { display: none; }
+    .page.active { display: block; }
+    
+    .progress-bar {
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.3s;
+    }
+    
+    .option {
+      padding: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .option.selected {
+      border-color: #667eea;
+      background: #f0f2ff;
+    }
+    .option:hover {
+      border-color: #667eea;
+    }
+    
+    .level-card {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #fff;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .stars { font-size: 36px; margin-bottom: 10px; }
+    .level-name { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .score {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .radar-chart {
+      width: 280px;
+      height: 280px;
+      margin: 20px auto;
+    }
+    
+    .dim-item {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .dim-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .dim-bar {
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+    }
+    .dim-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s;
+    }
+    .dim-fill.high { background: #4CAF50; }
+    .dim-fill.medium { background: #FFC107; }
+    .dim-fill.low { background: #FF9800; }
+    
+    .course-card {
+      display: flex;
+      padding: 16px;
+      background: #f8f9ff;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .course-icon { font-size: 32px; margin-right: 16px; }
+    .course-info { flex: 1; }
+    .course-name { font-weight: 600; margin-bottom: 4px; }
+    .course-meta { font-size: 12px; color: #666; }
+    .course-btn {
+      padding: 8px 16px;
+      background: #667eea;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #fff;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 100;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f0f0f0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .tip {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 首页 -->
+    <div id="page-home" class="page active">
+      <div class="header">
+        <span class="emoji">🌟</span>
+        <h1>星星云课堂</h1>
+        <p>为健康寻光 · 公益项目</p>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">🧩 能力评估系统</h2>
+        <p style="color:#666;line-height:1.8;margin-bottom:16px;">
+          了解孩子的发展水平，推荐适合的课程
+        </p>
+        
+        <div class="tip">
+          ⏱️ 用时：15-20 分钟<br>
+          📝 题目：8 道精简题<br>
+          💡 可分次完成
+        </div>
+        
+        <button class="btn btn-primary" onclick="goToPage('guide')">开始评估 ▶</button>
+        <button class="btn btn-secondary" onclick="showDemoResult()">查看示例报告</button>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">📊 5 大维度</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;">
+          <div><div style="font-size:24px;">🗣️</div><div style="font-size:12px;">语言</div></div>
+          <div><div style="font-size:24px;">🎭</div><div style="font-size:12px;">社交</div></div>
+          <div><div style="font-size:24px;">👁️</div><div style="font-size:12px;">认知</div></div>
+          <div><div style="font-size:24px;">✋</div><div style="font-size:12px;">精细</div></div>
+          <div><div style="font-size:24px;">💃</div><div style="font-size:12px;">大运动</div></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 引导页 -->
+    <div id="page-guide" class="page">
+      <button class="back-btn" onclick="goToPage('home')">←</button>
+      
+      <div class="header">
+        <span class="emoji">📋</span>
+        <h1>评估说明</h1>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">评估目的</h2>
+        <ul style="line-height:2;color:#666;padding-left:20px;">
+          <li>了解孩子能力水平</li>
+          <li>匹配适合的课程</li>
+          <li>追踪学习进展</li>
+        </ul>
+      </div>
+      
+      <div class="tip">
+        ⚠️ 本评估用于<b>教育课程匹配</b>，<b>不是临床诊断</b>工具
+      </div>
+      
+      <button class="btn btn-primary" onclick="goToPage('info')">我了解了 ▶</button>
+    </div>
+    
+    <!-- 信息页 -->
+    <div id="page-info" class="page">
+      <button class="back-btn" onclick="goToPage('guide')">←</button>
+      
+      <div class="header">
+        <span class="emoji">👦</span>
+        <h1>基本信息</h1>
+      </div>
+      
+      <div class="card">
+        <label style="display:block;margin-bottom:8px;font-weight:600;">孩子昵称</label>
+        <input type="text" id="childName" placeholder="请输入昵称">
+        
+        <label style="display:block;margin-bottom:8px;font-weight:600;">年龄</label>
+        <select id="childAge">
+          <option value="">请选择</option>
+          <option value="3">3 岁</option>
+          <option value="4">4 岁</option>
+          <option value="5">5 岁</option>
+          <option value="6">6 岁</option>
+          <option value="7">7 岁</option>
+          <option value="8">8 岁</option>
+          <option value="9">9 岁</option>
+          <option value="10">10 岁</option>
+        </select>
+      </div>
+      
+      <button class="btn btn-primary" onclick="startAssessment()">开始测试 ▶</button>
+    </div>
+    
+    <!-- 测试页 -->
+    <div id="page-question" class="page">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div style="text-align:center;color:#666;font-size:14px;margin-bottom:16px;">
+        题目 <span id="qNum">1</span>/8
+      </div>
+      
+      <div id="qContainer"></div>
+      
+      <div style="display:flex;gap:12px;margin-top:20px;">
+        <button class="btn btn-secondary" id="prevBtn" onclick="prevQ()" style="flex:1">← 上一题</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextQ()" style="flex:1">下一题 →</button>
+      </div>
+    </div>
+    
+    <!-- 加载页 -->
+    <div id="page-loading" class="page">
+      <div class="loading">
+        <div class="spinner"></div>
+        <h2>正在生成报告...</h2>
+        <p style="color:#666;">分析评估结果中</p>
+      </div>
+    </div>
+    
+    <!-- 结果页 -->
+    <div id="page-result" class="page">
+      <button class="back-btn" onclick="goToPage('home')">←</button>
+      
+      <div class="header">
+        <span class="emoji">🎉</span>
+        <h1>评估报告</h1>
+        <p id="resultDate"></p>
+      </div>
+      
+      <div class="level-card" id="levelCard">
+        <div class="stars" id="levelStars">⭐⭐</div>
+        <div class="level-name" id="levelName">L2 能力发展级</div>
+        <div>需要中等支持 · 适合进阶课程</div>
+        <div class="score" id="scoreCircle">65 分</div>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">📊 五维能力图</h2>
+        <canvas id="radarChart" class="radar-chart" width="280" height="280"></canvas>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">各维度得分</h2>
+        <div id="dimDetails"></div>
+      </div>
+      
+      <div class="card" style="background:#e8f5e9;border-left:4px solid #4CAF50;">
+        <h2 class="card-title">💪 优势领域</h2>
+        <p id="strengthText" style="color:#2e7d32;line-height:1.6;"></p>
+      </div>
+      
+      <div class="card" style="background:#fff8e1;border-left:4px solid #FFC107;">
+        <h2 class="card-title">🌱 需要关注</h2>
+        <p id="attentionText" style="color:#f57f17;line-height:1.6;"></p>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">📚 推荐课程</h2>
+        <div class="course-card">
+          <div class="course-icon">🦘</div>
+          <div class="course-info">
+            <div class="course-name">双脚跳跳跳</div>
+            <div class="course-meta">8 分钟 · 大运动</div>
+          </div>
+          <button class="course-btn">开始 ▶</button>
+        </div>
+        <div class="course-card">
+          <div class="course-icon">🗣️</div>
+          <div class="course-info">
+            <div class="course-name">古诗词韵律</div>
+            <div class="course-meta">7 分钟 · 语言</div>
+          </div>
+          <button class="course-btn">开始 ▶</button>
+        </div>
+      </div>
+      
+      <button class="btn btn-primary" onclick="restart()">重新评估 🔄</button>
+      <button class="btn btn-secondary" onclick="share()">分享报告 📤</button>
+    </div>
+  </div>
+
+  <script>
+    // 题目数据
+    const questions = [
+      {
+        dim: '语言',
+        q: '孩子能听懂并执行简单指令（如"把杯子给我"）',
+        opts: [
+          { icon:'✅', t:'会', d:'能独立执行 3 种以上指令' },
+          { icon:'⚠️', t:'部分会', d:'需要手势提示' },
+          { icon:'❌', t:'不会', d:'难以执行' }
+        ]
+      },
+      {
+        dim: '语言',
+        q: '孩子能用口语单词表达基本需求（如"水""面包"）',
+        opts: [
+          { icon:'✅', t:'会', d:'能主动说出 10 个以上词' },
+          { icon:'⚠️', t:'部分会', d:'能说 3-10 个词' },
+          { icon:'❌', t:'不会', d:'只能说 0-2 个词' }
+        ]
+      },
+      {
+        dim: '语言',
+        q: '孩子能说 2-3 个词的短句（如"我要喝水"）',
+        opts: [
+          { icon:'✅', t:'会', d:'经常使用短句' },
+          { icon:'⚠️', t:'部分会', d:'偶尔说短句' },
+          { icon:'❌', t:'不会', d:'从未说过短句' }
+        ]
+      },
+      {
+        dim: '社交',
+        q: '当叫孩子名字时，孩子会有眼神接触',
+        opts: [
+          { icon:'✅', t:'会', d:'多数时候有眼神接触' },
+          { icon:'⚠️', t:'部分会', d:'偶尔有眼神接触' },
+          { icon:'❌', t:'不会', d:'很少有眼神接触' }
+        ]
+      },
+      {
+        dim: '社交',
+        q: '孩子会主动分享喜爱的物品给家人',
+        opts: [
+          { icon:'✅', t:'会', d:'经常主动分享' },
+          { icon:'⚠️', t:'部分会', d:'偶尔分享' },
+          { icon:'❌', t:'不会', d:'从不分享' }
+        ]
+      },
+      {
+        dim: '精细',
+        q: '孩子能独立握笔涂鸦',
+        opts: [
+          { icon:'✅', t:'会', d:'能正确握笔涂鸦' },
+          { icon:'⚠️', t:'部分会', d:'能握笔但姿势不正确' },
+          { icon:'❌', t:'不会', d:'无法握笔' }
+        ]
+      },
+      {
+        dim: '认知',
+        q: '孩子能识别基本颜色（红/黄/蓝/绿）',
+        opts: [
+          { icon:'✅', t:'会', d:'能识别 4 种颜色' },
+          { icon:'⚠️', t:'部分会', d:'能识别 2-3 种颜色' },
+          { icon:'❌', t:'不会', d:'只能识别 0-1 种' }
+        ]
+      },
+      {
+        dim: '大运动',
+        q: '孩子能双脚同时跳离地面',
+        opts: [
+          { icon:'✅', t:'会', d:'能连续双脚跳 3 次以上' },
+          { icon:'⚠️', t:'部分会', d:'能跳起 1-2 次' },
+          { icon:'❌', t:'不会', d:'无法跳离地面' }
+        ]
+      }
+    ];
+
+    let currentQ = 0;
+    let answers = new Array(questions.length).fill(null);
+    let childInfo = { name: '', age: '' };
+
+    function goToPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    function startAssessment() {
+      childInfo.name = document.getElementById('childName').value || '小朋友';
+      childInfo.age = document.getElementById('childAge').value;
+      if (!childInfo.name) { alert('请输入昵称'); return; }
+      currentQ = 0;
+      answers = new Array(questions.length).fill(null);
+      loadQ();
+      goToPage('question');
+    }
+
+    function loadQ() {
+      const q = questions[currentQ];
+      const container = document.getElementById('qContainer');
+      
+      const progress = ((currentQ + 1) / questions.length) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+      document.getElementById('qNum').textContent = currentQ + 1;
+
+      let html = `
+        <div class="card">
+          <div style="font-size:12px;color:#999;margin-bottom:8px;">${q.dim} · 第${currentQ+1}题</div>
+          <div style="font-size:18px;font-weight:600;margin-bottom:20px;line-height:1.5;">${q.q}</div>
+      `;
+
+      q.opts.forEach((opt, idx) => {
+        const sel = answers[currentQ] === idx ? 'selected' : '';
+        html += `
+          <div class="option ${sel}" onclick="selectOpt(${idx})">
+            <div style="font-size:20px;">${opt.icon} ${opt.t}</div>
+            <div style="font-size:13px;color:#666;margin-top:4px;">${opt.d}</div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      container.innerHTML = html;
+
+      document.getElementById('prevBtn').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+      document.getElementById('nextBtn').textContent = currentQ === questions.length - 1 ? '提交 ✓' : '下一题 →';
+    }
+
+    function selectOpt(idx) {
+      answers[currentQ] = idx;
+      loadQ();
+    }
+
+    function prevQ() {
+      if (currentQ > 0) { currentQ--; loadQ(); }
+    }
+
+    function nextQ() {
+      if (answers[currentQ] === null) { alert('请先选择答案'); return; }
+      if (currentQ === questions.length - 1) {
+        goToPage('loading');
+        setTimeout(generateReport, 1500);
+      } else {
+        currentQ++;
+        loadQ();
+      }
+    }
+
+    function generateReport() {
+      const dims = { '语言':{s:0,m:0}, '社交':{s:0,m:0}, '认知':{s:0,m:0}, '精细':{s:0,m:0}, '大运动':{s:0,m:0} };
+      
+      questions.forEach((q, i) => {
+        const a = answers[i];
+        if (a !== null) {
+          const pts = [0, 1, 2][a] || 0;
+          dims[q.dim].s += pts;
+          dims[q.dim].m += 2;
+        }
+      });
+
+      const percs = {};
+      let totalS = 0, totalM = 0;
+      for (const [d, data] of Object.entries(dims)) {
+        if (data.m > 0) {
+          percs[d] = Math.round((data.s / data.m) * 100);
+          totalS += data.s;
+          totalM += data.m;
+        } else {
+          percs[d] = 50;
+        }
+      }
+
+      const overall = Math.round((totalS / totalM) * 100);
+      
+      let level, lvlName, stars;
+      if (overall <= 40) { level='L1'; lvlName='基础启蒙级'; stars='⭐'; }
+      else if (overall <= 70) { level='L2'; lvlName='能力发展级'; stars='⭐⭐'; }
+      else { level='L3'; lvlName='社交融合级'; stars='⭐⭐⭐'; }
+
+      document.getElementById('levelStars').textContent = stars;
+      document.getElementById('levelName').textContent = `${level} ${lvlName}`;
+      document.getElementById('scoreCircle').textContent = `${overall}分`;
+      document.getElementById('resultDate').textContent = `${childInfo.name} · ${new Date().toLocaleDateString('zh-CN')}`;
+
+      renderRadar(percs);
+      renderDims(dims, percs);
+
+      const sorted = Object.entries(percs).sort((a,b) => b[1] - a[1]);
+      document.getElementById('strengthText').textContent = `${sorted[0][0]}能力较好，继续加强训练。`;
+      document.getElementById('attentionText').textContent = `${sorted[sorted.length-1][0]}能力需要更多练习。`;
+
+      goToPage('result');
+    }
+
+    function renderRadar(percs) {
+      const cvs = document.getElementById('radarChart');
+      const ctx = cvs.getContext('2d');
+      const cx = 140, cy = 140, r = 100;
+      const labels = ['语言', '社交', '认知', '精细', '大运动'];
+      const angles = labels.map((_, i) => (Math.PI * 2 * i) / 5 - Math.PI / 2);
+
+      ctx.clearRect(0, 0, 280, 280);
+      
+      // 网格
+      for (let i = 1; i <= 5; i++) {
+        ctx.beginPath();
+        for (let j = 0; j < 5; j++) {
+          const angle = angles[j];
+          const nr = (r / 5) * i;
+          const x = cx + Math.cos(angle) * nr;
+          const y = cy + Math.sin(angle) * nr;
+          if (j === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.stroke();
+      }
+
+      // 轴线
+      angles.forEach((angle, i) => {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.stroke();
+        
+        // 标签
+        const lx = cx + Math.cos(angle) * (r + 25);
+        const ly = cy + Math.sin(angle) * (r + 25);
+        ctx.fillStyle = '#333';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labels[i], lx, ly);
+      });
+
+      // 数据区域
+      ctx.beginPath();
+      angles.forEach((angle, i) => {
+        const val = percs[labels[i]] || 50;
+        const nr = (r / 100) * val;
+        const x = cx + Math.cos(angle) * nr;
+        const y = cy + Math.sin(angle) * nr;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+      ctx.fill();
+      ctx.strokeStyle = '#667eea';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 数据点
+      angles.forEach((angle, i) => {
+        const val = percs[labels[i]] || 50;
+        const nr = (r / 100) * val;
+        const x = cx + Math.cos(angle) * nr;
+        const y = cy + Math.sin(angle) * nr;
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#667eea';
+        ctx.fill();
+      });
+    }
+
+    function renderDims(dims, percs) {
+      const container = document.getElementById('dimDetails');
+      const dimsList = [
+        { id: '语言', icon: '🗣️' },
+        { id: '社交', icon: '🎭' },
+        { id: '认知', icon: '👁️' },
+        { id: '精细', icon: '✋' },
+        { id: '大运动', icon: '💃' }
+      ];
+
+      let html = '';
+      dimsList.forEach(dim => {
+        const data = dims[dim.id];
+        const perc = percs[dim.id] || 50;
+        const lvl = perc >= 70 ? 'high' : perc >= 40 ? 'medium' : 'low';
+        const score = data ? `${data.s}/${data.m}` : '0/0';
+
+        html += `
+          <div class="dim-item">
+            <div class="dim-header">
+              <div>${dim.icon} ${dim.id}</div>
+              <div style="color:#666;font-size:13px;">${perc}% (${score})</div>
+            </div>
+            <div class="dim-bar">
+              <div class="dim-fill ${lvl}" style="width:${perc}%"></div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function showDemoResult() {
+      childInfo.name = '小明';
+      goToPage('loading');
+      setTimeout(() => {
+        const percs = { '语言': 81, '社交': 67, '认知': 50, '精细': 83, '大运动': 42 };
+        const dims = {
+          '语言':{s:13,m:16}, '社交':{s:8,m:12}, '认知':{s:6,m:12},
+          '精细':{s:10,m:12}, '大运动':{s:5,m:12}
+        };
+        
+        document.getElementById('levelStars').textContent = '⭐⭐';
+        document.getElementById('levelName').textContent = 'L2 能力发展级';
+        document.getElementById('scoreCircle').textContent = '65 分';
+        document.getElementById('resultDate').textContent = `${childInfo.name} · ${new Date().toLocaleDateString('zh-CN')}`;
+        
+        renderRadar(percs);
+        renderDims(dims, percs);
+        
+        document.getElementById('strengthText').textContent = '语言和精细动作能力较好，继续加强训练。';
+        document.getElementById('attentionText').textContent = '大运动能力需要更多练习。';
+        
+        goToPage('result');
+      }, 1000);
+    }
+
+    function restart() {
+      if (confirm('确定重新评估吗？')) {
+        currentQ = 0;
+        answers = new Array(questions.length).fill(null);
+        goToPage('home');
+      }
+    }
+
+    function share() {
+      const txt = `我在星星云课堂完成了评估：${document.getElementById('levelName').textContent}！`;
+      if (navigator.share) {
+        navigator.share({ title: '星星云课堂评估', text: txt }).catch(()=>{});
+      } else {
+        prompt('复制分享:', txt);
+      }
+    }
+  </script>
+</body>
+</html>
