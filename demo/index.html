@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星星云课堂 - 儿童能力评估系统 Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* 页面切换 */
+    .page {
+      display: none;
+      padding: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 头部 */
+    .header {
+      text-align: center;
+      padding: 30px 20px;
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .emoji-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    /* 按钮 */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 12px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #e8e8e8;
+    }
+
+    /* 卡片 */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #333;
+    }
+
+    /* 进度条 */
+    .progress-container {
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    /* 题目样式 */
+    .question-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+
+    .question-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #667eea;
+      color: #fff;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    .question-number {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .option-item {
+      padding: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .option-item:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+
+    .option-item.selected {
+      border-color: #667eea;
+      background: #f0f2ff;
+    }
+
+    .option-item .icon {
+      font-size: 24px;
+      margin-right: 12px;
+    }
+
+    .option-item .text {
+      font-size: 15px;
+      color: #333;
+    }
+
+    .option-item .desc {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    /* 结果页面 */
+    .level-card {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .level-stars {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .level-name {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .level-desc {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    /* 雷达图容器 */
+    .radar-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .radar-title {
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    /* 维度详情 */
+    .dimension-item {
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .dimension-item:last-child {
+      border-bottom: none;
+    }
+
+    .dimension-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .dimension-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .dimension-score {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .dimension-bar {
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .dimension-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .dimension-fill.high {
+      background: #4CAF50;
+    }
+
+    .dimension-fill.medium {
+      background: #FFC107;
+    }
+
+    .dimension-fill.low {
+      background: #FF9800;
+    }
+
+    /* 课程推荐 */
+    .course-card {
+      display: flex;
+      padding: 16px;
+      background: #f8f9ff;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .course-icon {
+      font-size: 32px;
+      margin-right: 16px;
+    }
+
+    .course-info {
+      flex: 1;
+    }
+
+    .course-name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .course-meta {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .course-btn {
+      padding: 8px 16px;
+      background: #667eea;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* 导航栏 */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      padding: 12px 20px;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* 返回按钮 */
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      z-index: 100;
+    }
+
+    /* 提示信息 */
+    .tip-box {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #856404;
+    }
+
+    /* 视频区域 */
+    .video-placeholder {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    .video-placeholder:hover {
+      opacity: 0.9;
+    }
+
+    /* 加载动画 */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f0f0f0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 优势关注卡片 */
+    .strength-card {
+      background: #e8f5e9;
+      border-left: 4px solid #4CAF50;
+    }
+
+    .attention-card {
+      background: #fff8e1;
+      border-left: 4px solid #FFC107;
+    }
+
+    .card-icon {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 480px) {
+      .container {
+        max-width: 100%;
+      }
+      
+      .nav-bar {
+        position: fixed;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 首页 -->
+    <div id="page-home" class="page active">
+      <div class="header">
+        <div class="emoji-icon">🌟</div>
+        <h1>星星云课堂</h1>
+        <p>为健康寻光 · 星星云课堂公益项目</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">🧩 能力评估系统</h2>
+        <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+          通过专业的能力评估，了解孩子的发展水平，<br>
+          为您推荐最适合的课程。
+        </p>
+        
+        <div class="tip-box">
+          ⏱️ 预计用时：15-20 分钟<br>
+          📝 题目数量：32 道互动题<br>
+          💡 可分次完成，进度自动保存
+        </div>
+
+        <button class="btn btn-primary" onclick="goToPage('guide')">开始评估 ▶</button>
+        <button class="btn btn-secondary" onclick="showDemoResult()">查看示例报告</button>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">📊 评估维度</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="text-align: center; padding: 12px; background: #f8f9ff; border-radius: 8px;">
+            <div style="font-size: 24px;">🗣️</div>
+            <div style="font-size: 13px; margin-top: 4px;">语言沟通</div>
+            <div style="font-size: 11px; color: #999;">25%</div>
+          </div>
+          <div style="text-align: center; padding: 12px; background: #f8f9ff; border-radius: 8px;">
+            <div style="font-size: 24px;">🎭</div>
+            <div style="font-size: 13px; margin-top: 4px;">社交情感</div>
+            <div style="font-size: 11px; color: #999;">25%</div>
+          </div>
+          <div style="text-align: center; padding: 12px; background: #f8f9ff; border-radius: 8px;">
+            <div style="font-size: 24px;">👁️</div>
+            <div style="font-size: 13px; margin-top: 4px;">视觉认知</div>
+            <div style="font-size: 11px; color: #999;">20%</div>
+          </div>
+          <div style="text-align: center; padding: 12px; background: #f8f9ff; border-radius: 8px;">
+            <div style="font-size: 24px;">✋</div>
+            <div style="font-size: 13px; margin-top: 4px;">精细动作</div>
+            <div style="font-size: 11px; color: #999;">15%</div>
+          </div>
+          <div style="text-align: center; padding: 12px; background: #f8f9ff; border-radius: 8px; grid-column: span 2;">
+            <div style="font-size: 24px;">💃</div>
+            <div style="font-size: 13px; margin-top: 4px;">大运动与感统</div>
+            <div style="font-size: 11px; color: #999;">15%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 引导页 -->
+    <div id="page-guide" class="page">
+      <button class="back-btn" onclick="goToPage('home')">←</button>
+      
+      <div class="header">
+        <div class="emoji-icon">📋</div>
+        <h1>评估说明</h1>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">评估目的</h2>
+        <ul style="line-height: 2; color: #666; padding-left: 20px;">
+          <li>了解孩子当前能力水平</li>
+          <li>匹配适合的课程难度</li>
+          <li>追踪学习进展</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">⚠️ 重要提示</h2>
+        <p style="color: #666; line-height: 1.6;">
+          本评估用于<strong>教育课程匹配</strong>，<br>
+          <strong>不是临床诊断工具</strong>。<br>
+          如孩子尚未确诊，建议先到正规医院评估。
+        </p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">评估流程</h2>
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <div style="width: 30px; height: 30px; background: #667eea; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">1</div>
+          <div>填写基本信息</div>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <div style="width: 30px; height: 30px; background: #667eea; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">2</div>
+          <div>完成 32 道测试题</div>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <div style="width: 30px; height: 30px; background: #667eea; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">3</div>
+          <div>查看详细报告</div>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <div style="width: 30px; height: 30px; background: #667eea; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">4</div>
+          <div>开始推荐课程</div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="goToPage('info')">我了解了，开始评估 ▶</button>
+    </div>
+
+    <!-- 信息页 -->
+    <div id="page-info" class="page">
+      <button class="back-btn" onclick="goToPage('guide')">←</button>
+      
+      <div class="header">
+        <div class="emoji-icon">👦</div>
+        <h1>基本信息</h1>
+      </div>
+
+      <div class="card">
+        <label style="display: block; margin-bottom: 8px; font-weight: 600;">孩子昵称</label>
+        <input type="text" id="childName" placeholder="请输入孩子昵称" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+      </div>
+
+      <div class="card">
+        <label style="display: block; margin-bottom: 8px; font-weight: 600;">孩子年龄</label>
+        <select id="childAge" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+          <option value="">请选择年龄</option>
+          <option value="3">3 岁</option>
+          <option value="4">4 岁</option>
+          <option value="5">5 岁</option>
+          <option value="6">6 岁</option>
+          <option value="7">7 岁</option>
+          <option value="8">8 岁</option>
+          <option value="9">9 岁</option>
+          <option value="10">10 岁</option>
+          <option value="11">11 岁</option>
+          <option value="12">12 岁</option>
+        </select>
+      </div>
+
+      <div class="tip-box">
+        💡 信息仅用于生成个性化报告，不会泄露隐私
+      </div>
+
+      <button class="btn btn-primary" onclick="startAssessment()">开始测试 ▶</button>
+    </div>
+
+    <!-- 测试页 -->
+    <div id="page-question" class="page">
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div class="progress-text" id="progressText">题目 1/32</div>
+      </div>
+
+      <div id="questionContainer">
+        <!-- 题目内容动态加载 -->
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 20px;">
+        <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()" style="flex: 1;">← 上一题</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="flex: 1;">下一题 →</button>
+      </div>
+    </div>
+
+    <!-- 加载页 -->
+    <div id="page-loading" class="page">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <h2 style="margin-bottom: 12px;">正在生成报告...</h2>
+        <p style="color: #666;">分析评估结果中</p>
+      </div>
+    </div>
+
+    <!-- 结果页 -->
+    <div id="page-result" class="page">
+      <div class="header" style="margin: -20px -20px 20px -20px; border-radius: 0 0 20px 20px;">
+        <button class="back-btn" onclick="goToPage('home')" style="top: 15px; left: 15px;">←</button>
+        <div class="emoji-icon">🎉</div>
+        <h1>评估报告</h1>
+        <p id="resultDate"></p>
+      </div>
+
+      <!-- 等级卡片 -->
+      <div class="level-card" id="levelCard">
+        <div class="level-stars" id="levelStars">⭐⭐</div>
+        <div class="level-name" id="levelName">L2 能力发展级</div>
+        <div class="level-desc">需要中等支持 · 适合进阶课程</div>
+        <div class="score-circle" id="scoreCircle">65 分</div>
+      </div>
+
+      <!-- 雷达图 -->
+      <div class="radar-container">
+        <div class="radar-title">📊 五维能力雷达图</div>
+        <canvas id="radarChart"></canvas>
+      </div>
+
+      <!-- 维度详情 -->
+      <div class="card">
+        <h2 class="card-title">各维度得分</h2>
+        <div id="dimensionDetails">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+
+      <!-- 优势与关注 -->
+      <div class="card strength-card">
+        <h2 class="card-title"><span class="card-icon">💪</span>优势领域</h2>
+        <p id="strengthText" style="color: #2e7d32; line-height: 1.6;">
+          语言沟通能力较好，可以继续加强复杂句式的学习。
+        </p>
+      </div>
+
+      <div class="card attention-card">
+        <h2 class="card-title"><span class="card-icon">🌱</span>需要关注</h2>
+        <p id="attentionText" style="color: #f57f17; line-height: 1.6;">
+          大运动能力需要更多练习，建议增加运动类活动。
+        </p>
+      </div>
+
+      <!-- 课程推荐 -->
+      <div class="card">
+        <h2 class="card-title">📚 推荐课程</h2>
+        <div class="course-card">
+          <div class="course-icon">🦘</div>
+          <div class="course-info">
+            <div class="course-name">双脚跳跳跳</div>
+            <div class="course-meta">8 分钟 · 大运动训练</div>
+          </div>
+          <button class="course-btn">开始 ▶</button>
+        </div>
+        <div class="course-card">
+          <div class="course-icon">🎨</div>
+          <div class="course-info">
+            <div class="course-name">认识形状</div>
+            <div class="course-meta">5 分钟 · 视觉认知</div>
+          </div>
+          <button class="course-btn">开始 ▶</button>
+        </div>
+        <div class="course-card">
+          <div class="course-icon">🗣️</div>
+          <div class="course-info">
+            <div class="course-name">古诗词韵律</div>
+            <div class="course-meta">7 分钟 · 语言沟通</div>
+          </div>
+          <button class="course-btn">开始 ▶</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="restartAssessment()">重新评估 🔄</button>
+      <button class="btn btn-secondary" onclick="shareResult()">分享报告 📤</button>
+    </div>
+  </div>
+
+  <script>
+    // 题目数据（简化版，实际应为 32 题）
+    const questions = [
+      {
+        id: 1,
+        dimension: '语言沟通',
+        type: 'parent',
+        question: '孩子能听懂并执行简单指令（如"把杯子给我"）',
+        options: [
+          { icon: '✅', text: '会', desc: '能独立执行 3 种以上不同指令' },
+          { icon: '⚠️', text: '部分会', desc: '需要配合手势才能执行' },
+          { icon: '❌', text: '不会', desc: '即使有手势提示也难以执行' }
+        ]
+      },
+      {
+        id: 2,
+        dimension: '语言沟通',
+        type: 'parent',
+        question: '孩子能用口语单词表达基本需求（如"水""面包"）',
+        options: [
+          { icon: '✅', text: '会', desc: '能主动说出 10 个以上有意义的词' },
+          { icon: '⚠️', text: '部分会', desc: '能说 3-10 个词' },
+          { icon: '❌', text: '不会', desc: '只能说 0-2 个词' }
+        ]
+      },
+      {
+        id: 3,
+        dimension: '语言沟通',
+        type: 'interactive',
+        question: '跟读测试：请孩子跟着视频说"苹——果——"',
+        video: true,
+        options: [
+          { icon: '✅', text: '会', desc: '能清晰模仿发音' },
+          { icon: '⚠️', text: '部分会', desc: '有发音尝试' },
+          { icon: '❌', text: '不会', desc: '无反应' }
+        ]
+      },
+      {
+        id: 4,
+        dimension: '社交情感',
+        type: 'parent',
+        question: '当叫孩子名字时，孩子会有眼神接触',
+        options: [
+          { icon: '✅', text: '会', desc: '多数时候有眼神接触' },
+          { icon: '⚠️', text: '部分会', desc: '偶尔有眼神接触' },
+          { icon: '❌', text: '不会', desc: '很少有眼神接触' }
+        ]
+      },
+      {
+        id: 5,
+        dimension: '社交情感',
+        type: 'parent',
+        question: '孩子会主动把喜爱的物品分享给家人',
+        options: [
+          { icon: '✅', text: '会', desc: '经常主动分享' },
+          { icon: '⚠️', text: '部分会', desc: '偶尔分享' },
+          { icon: '❌', text: '不会', desc: '从不分享' }
+        ]
+      },
+      {
+        id: 6,
+        dimension: '视觉认知',
+        type: 'interactive',
+        question: '图片配对：请选出和左边相同的图片',
+        interactive: 'matching',
+        options: [
+          { icon: '✅', text: '正确', desc: '配对正确' },
+          { icon: '⚠️', text: '部分正确', desc: '需要提示' },
+          { icon: '❌', text: '错误', desc: '无法完成' }
+        ]
+      },
+      {
+        id: 7,
+        dimension: '精细动作',
+        type: 'parent',
+        question: '孩子能独立握笔涂鸦',
+        options: [
+          { icon: '✅', text: '会', desc: '能正确握笔，有目的性涂鸦' },
+          { icon: '⚠️', text: '部分会', desc: '能握笔但姿势不正确' },
+          { icon: '❌', text: '不会', desc: '无法握笔' }
+        ]
+      },
+      {
+        id: 8,
+        dimension: '大运动',
+        type: 'parent',
+        question: '孩子能双脚同时跳离地面',
+        options: [
+          { icon: '✅', text: '会', desc: '能连续双脚跳 3 次以上' },
+          { icon: '⚠️', text: '部分会', desc: '能跳起 1-2 次' },
+          { icon: '❌', text: '不会', desc: '无法跳离地面' }
+        ]
+      }
+    ];
+
+    // 状态管理
+    let currentQuestion = 0;
+    let answers = new Array(questions.length).fill(null);
+    let childInfo = { name: '', age: '' };
+
+    // 页面切换
+    function goToPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById('page-' + pageId).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    // 开始评估
+    function startAssessment() {
+      childInfo.name = document.getElementById('childName').value || '小朋友';
+      childInfo.age = document.getElementById('childAge').value;
+      
+      if (!childInfo.name) {
+        alert('请输入孩子昵称');
+        return;
+      }
+
+      currentQuestion = 0;
+      answers = new Array(questions.length).fill(null);
+      loadQuestion();
+      goToPage('question');
+    }
+
+    // 加载题目
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      const container = document.getElementById('questionContainer');
+      
+      // 更新进度
+      const progress = ((currentQuestion + 1) / questions.length) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+      document.getElementById('progressText').textContent = `题目 ${currentQuestion + 1}/${questions.length}`;
+
+      // 生成题目 HTML
+      let html = `
+        <div class="question-card">
+          <div class="question-tag">${q.type === 'parent' ? '👨‍👩‍👧 家长观察' : '🎮 互动测试'}</div>
+          <div class="question-number">${q.dimension} · 第${q.id}题</div>
+          <div class="question-text">${q.question}</div>
+          ${q.video ? '<div class="video-placeholder" onclick="alert(\'播放演示视频\')">▶ 点击播放演示视频 (10 秒)</div>' : ''}
+          ${q.interactive === 'matching' ? '<div class="video-placeholder" onclick="alert(\'打开图片配对游戏\')">🎮 点击开始配对游戏</div>' : ''}
+      `;
+
+      q.options.forEach((opt, idx) => {
+        const selected = answers[currentQuestion] === idx ? 'selected' : '';
+        html += `
+          <div class="option-item ${selected}" onclick="selectOption(${idx})">
+            <div><span class="icon">${opt.icon}</span><span class="text">${opt.text}</span></div>
+            <div class="desc">${opt.desc}</div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      container.innerHTML = html;
+
+      // 更新按钮状态
+      document.getElementById('prevBtn').style.visibility = currentQuestion === 0 ? 'hidden' : 'visible';
+      document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? '提交评估 ✓' : '下一题 →';
+    }
+
+    // 选择答案
+    function selectOption(idx) {
+      answers[currentQuestion] = idx;
+      loadQuestion();
+    }
+
+    // 上一题
+    function prevQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        loadQuestion();
+      }
+    }
+
+    // 下一题
+    function nextQuestion() {
+      if (answers[currentQuestion] === null) {
+        alert('请先选择答案');
+        return;
+      }
+
+      if (currentQuestion === questions.length - 1) {
+        // 提交评估
+        goToPage('loading');
+        setTimeout(generateReport, 2000);
+      } else {
+        currentQuestion++;
+        loadQuestion();
+      }
+    }
+
+    // 生成报告
+    function generateReport() {
+      // 计算得分（简化算法）
+      const dimensionScores = {
+        '语言沟通': { score: 0, max: 0 },
+        '社交情感': { score: 0, max: 0 },
+        '视觉认知': { score: 0, max: 0 },
+        '精细动作': { score: 0, max: 0 },
+        '大运动': { score: 0, max: 0 }
+      };
+
+      questions.forEach((q, idx) => {
+        const answer = answers[idx];
+        if (answer !== null) {
+          const points = [0, 1, 2][answer] || 0;
+          if (dimensionScores[q.dimension]) {
+            dimensionScores[q.dimension].score += points;
+            dimensionScores[q.dimension].max += 2;
+          }
+        }
+      });
+
+      // 计算百分比
+      const percentages = {};
+      let totalScore = 0;
+      let totalMax = 0;
+
+      for (const [dim, data] of Object.entries(dimensionScores)) {
+        if (data.max > 0) {
+          percentages[dim] = Math.round((data.score / data.max) * 100);
+          totalScore += data.score;
+          totalMax += data.max;
+        } else {
+          percentages[dim] = 50; // 默认值
+        }
+      }
+
+      const overallPercentage = Math.round((totalScore / totalMax) * 100);
+
+      // 确定等级
+      let level, levelName, stars;
+      if (overallPercentage <= 40) {
+        level = 'L1';
+        levelName = '基础启蒙级';
+        stars = '⭐';
+      } else if (overallPercentage <= 70) {
+        level = 'L2';
+        levelName = '能力发展级';
+        stars = '⭐⭐';
+      } else {
+        level = 'L3';
+        levelName = '社交融合级';
+        stars = '⭐⭐⭐';
+      }
+
+      // 更新结果页面
+      document.getElementById('levelStars').textContent = stars;
+      document.getElementById('levelName').textContent = `${level} ${levelName}`;
+      document.getElementById('scoreCircle').textContent = `${overallPercentage}分`;
+      document.getElementById('resultDate').textContent = `${childInfo.name} · ${new Date().toLocaleDateString('zh-CN')}`;
+
+      // 渲染雷达图
+      renderRadarChart(percentages);
+
+      // 渲染维度详情
+      renderDimensionDetails(dimensionScores, percentages);
+
+      // 更新优势和关注
+      const sortedDims = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+      const strengthDim = sortedDims[0];
+      const attentionDim = sortedDims[sortedDims.length - 1];
+
+      document.getElementById('strengthText').textContent = `${strengthDim[0]}能力${strengthDim[1] >= 70 ? '优秀' : '较好'}，可以继续加强相关训练。`;
+      document.getElementById('attentionText').textContent = `${attentionDim[0]}能力需要更多练习，建议选择相关课程强化。`;
+
+      goToPage('result');
+    }
+
+    // 渲染雷达图
+    function renderRadarChart(percentages) {
+      const ctx = document.getElementById('radarChart').getContext('2d');
+      
+      if (window.radarChart) {
+        window.radarChart.destroy();
+      }
+
+      window.radarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['语言沟通', '社交情感', '视觉认知', '精细动作', '大运动'],
+          datasets: [{
+            label: '能力得分',
+            data: [
+              percentages['语言沟通'] || 50,
+              percentages['社交情感'] || 50,
+              percentages['视觉认知'] || 50,
+              percentages['精细动作'] || 50,
+              percentages['大运动'] || 50
+            ],
+            backgroundColor: 'rgba(102, 126, 234, 0.2)',
+            borderColor: 'rgba(102, 126, 234, 1)',
+            pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          scales: {
+            r: {
+              angleLines: {
+                display: true
+              },
+              suggestedMin: 0,
+              suggestedMax: 100,
+              ticks: {
+                stepSize: 20,
+                callback: value => value + '%'
+              },
+              pointLabels: {
+                font: {
+                  size: 12
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    // 渲染维度详情
+    function renderDimensionDetails(dimensionScores, percentages) {
+      const container = document.getElementById('dimensionDetails');
+      let html = '';
+
+      const dimensions = [
+        { id: '语言沟通', icon: '🗣️', weight: '25%' },
+        { id: '社交情感', icon: '🎭', weight: '25%' },
+        { id: '视觉认知', icon: '👁️', weight: '20%' },
+        { id: '精细动作', icon: '✋', weight: '15%' },
+        { id: '大运动', icon: '💃', weight: '15%' }
+      ];
+
+      dimensions.forEach(dim => {
+        const data = dimensionScores[dim.id];
+        const percentage = percentages[dim.id] || 50;
+        const level = percentage >= 70 ? 'high' : percentage >= 40 ? 'medium' : 'low';
+        const score = data ? `${data.score}/${data.max}` : '0/0';
+
+        html += `
+          <div class="dimension-item">
+            <div class="dimension-header">
+              <div class="dimension-name">${dim.icon} ${dim.id}</div>
+              <div class="dimension-score">${percentage}% (${score})</div>
+            </div>
+            <div class="dimension-bar">
+              <div class="dimension-fill ${level}" style="width: ${percentage}%"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // 查看示例报告
+    function showDemoResult() {
+      childInfo.name = '小明';
+      childInfo.age = '6';
+      goToPage('loading');
+      setTimeout(() => {
+        // 模拟数据
+        const percentages = {
+          '语言沟通': 81,
+          '社交情感': 67,
+          '视觉认知': 50,
+          '精细动作': 83,
+          '大运动': 42
+        };
+
+        document.getElementById('levelStars').textContent = '⭐⭐';
+        document.getElementById('levelName').textContent = 'L2 能力发展级';
+        document.getElementById('scoreCircle').textContent = '65 分';
+        document.getElementById('resultDate').textContent = `${childInfo.name} · ${new Date().toLocaleDateString('zh-CN')}`;
+
+        renderRadarChart(percentages);
+
+        const dimensionScores = {
+          '语言沟通': { score: 13, max: 16 },
+          '社交情感': { score: 8, max: 12 },
+          '视觉认知': { score: 6, max: 12 },
+          '精细动作': { score: 10, max: 12 },
+          '大运动': { score: 5, max: 12 }
+        };
+
+        renderDimensionDetails(dimensionScores, percentages);
+
+        document.getElementById('strengthText').textContent = '语言沟通和精细动作能力较好，可以继续加强相关训练。';
+        document.getElementById('attentionText').textContent = '大运动能力需要更多练习，建议选择运动类课程强化。';
+
+        goToPage('result');
+      }, 1500);
+    }
+
+    // 重新评估
+    function restartAssessment() {
+      if (confirm('确定要重新评估吗？当前结果将丢失。')) {
+        currentQuestion = 0;
+        answers = new Array(questions.length).fill(null);
+        goToPage('home');
+      }
+    }
+
+    // 分享报告
+    function shareResult() {
+      const text = `我在星星云课堂完成了能力评估，结果是：${document.getElementById('levelName').textContent}！快来一起体验吧~`;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: '星星云课堂评估报告',
+          text: text,
+          url: window.location.href
+        }).catch(console.error);
+      } else {
+        prompt('复制以下文字分享给朋友：', text);
+      }
+    }
+  </script>
+</body>
+</html>
